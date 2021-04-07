@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.FileManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.FileManagement">
+        <id column="FJBH" property="fileId" />
+        <result column="FJMC" property="fileName" />
+        <result column="FJHZM" property="fileType" />
+        <result column="FJCCLJ" property="filePath" />
+        <result column="FJDX" property="fileSize" />
+        <result column="SSBH" property="typeId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        FJBH, FJMC, FJHZM, FJCCLJ, FJDX, SSBH
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_FJGLB
+    </select>
+
+    <select id="queryByIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM LY_LDD_FJGLB
+        <where>
+            FJBH in
+            <foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <insert id="batchInsert" parameterType="com.ly.cloud.user.entity.FileManagement">
+        INSERT ALL
+        <foreach collection="list" item="item" index="index">
+            INTO LY_LDD_FJGLB
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="item.fileId != null and item.fileId != ''">
+                    FJBH,
+                </if>
+                <if test="item.fileName != null and item.fileName != ''">
+                    FJMC,
+                </if>
+                <if test="item.fileType != null and item.fileType != ''">
+                    FJHZM,
+                </if>
+                <if test="item.filePath != null and item.filePath != ''">
+                    FJCCLJ,
+                </if>
+                <if test="item.fileSize != null">
+                    FJDX,
+                </if>
+                <if test="item.typeId != null">
+                    SSBH,
+                </if>
+            </trim>
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="item.fileId != null and item.fileId != ''">
+                    #{item.fileId},
+                </if>
+                <if test="item.fileName != null and item.fileName != ''">
+                    #{item.fileName},
+                </if>
+                <if test="item.fileType != null and item.fileType != ''">
+                    #{item.fileType},
+                </if>
+                <if test="item.filePath != null and item.filePath != ''">
+                    #{item.filePath},
+                </if>
+                <if test="item.fileSize != null">
+                    #{item.fileSize},
+                </if>
+                <if test="item.typeId != null">
+                    #{item.typeId},
+                </if>
+            </trim>
+        </foreach>
+        SELECT 1 FROM DUAL
+    </insert>
+
+
+    <update id="updateFileNameById">
+        update LY_LDD_FJGLB
+        set FJMC = #{fileName}
+        <where>
+            FJBH = #{fileId}
+        </where>
+    </update>
+
+    <select id="queryAllFileIdById" resultMap="BaseResultMap">
+        select
+        fjb.*
+        from LY_LDD_FJGLB fjb
+        <where>
+            fjb.SSBH = #{id}
+        </where>
+    </select>
+
+    <!--    删除文章/培训/项目/资源的同时，需要删除对应的banner和附件-->
+    <delete id="deleteFilesByTypeId">
+        delete
+        from LY_LDD_FJGLB
+        <where>
+            SSBH = #{id}
+        </where>
+    </delete>
+
+<!--    获取对应文件的路径-->
+    <select id="getFilePath" parameterType="String" resultType="java.lang.String">
+        SELECT
+        fjb.FJCCLJ
+        FROM LY_LDD_FJGLB fjb
+        WHERE fjb.FJBH = #{id}
+    </select>
+
+<!--    获取文件对应的路径列表，返回list-->
+    <select id="getFilePathList" parameterType="String" resultType="java.lang.String">
+        SELECT
+        fjb.FJCCLJ
+        FROM LY_LDD_FJGLB fjb
+        WHERE fjb.SSBH = #{id}
+    </select>
+
+<!--    根据typeId查找文件-->
+    <select id="getFileByProjectFollowUpId" resultMap="BaseResultMap">
+        SELECT *
+        FROM LY_LDD_FJGLB
+        WHERE SSBH = #{typeId}
+    </select>
+
+</mapper>

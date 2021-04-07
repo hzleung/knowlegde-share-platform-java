@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.ProjectMapManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.ProjectMapManagement">
+        <id column="ID" property="projectId" />
+        <result column="FBSJ" property="projectPublicTime" />
+        <result column="FBYH" property="projectPublicUser" />
+        <result column="XMMC" property="projectName" />
+        <result column="XMNR" property="projectContent" />
+        <result column="XMLJ" property="projectUrl" />
+        <result column="XMSSDQ" property="projectArea" />
+        <result column="XMLX" property="projectType" />
+        <result column="XMBBH" property="projectVersion" />
+        <result column="XMFJ" property="projectFiles" />
+        <result column="XMFM" property="projectBanner" />
+        <result column="XMZT" property="projectStatus" />
+        <result column="XMZZ" property="author" />
+    </resultMap>
+
+    <resultMap id="ProjectResultMap" type="com.ly.cloud.user.dto.ProjectDTO">
+        <id column="ID" property="projectId" />
+        <result column="FBSJ" property="projectPublicTime" />
+        <result column="FBYH" property="projectPublicUser" />
+        <result column="XMMC" property="projectName" />
+        <result column="XMNR" property="projectContent" />
+        <result column="XMLJ" property="projectUrl" />
+        <result column="XMSSDQ" property="projectArea" />
+        <result column="XMLX" property="projectType" />
+        <result column="XMBBH" property="projectVersion" />
+        <result column="XMFM" property="projectBanner" />
+        <result column="XMZT" property="projectStatus" />
+        <result column="XMZZ" property="author" />
+        <collection property="projectFiles" ofType="com.ly.cloud.user.entity.FileManagement">
+            <result column="FJBH" property="fileId"></result>
+            <result column="FJMC" property="fileName"></result>
+            <result column="FJHZM" property="fileType"></result>
+            <result column="FJCCLJ" property="filePath"></result>
+            <result column="FJDX" property="fileSize"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, FBSJ, FBYH, XMMC, XMLJ, XMSSDQ, XMLX, XMBBH, XMFJ, XMFM, XMZT, XMZZ
+    </sql>
+
+    <select id="queryPage" resultMap="ProjectResultMap">
+        select
+        xmb.*,fj.FJMC,fj.SSBH,fj.FJDX,fj.FJBH from LY_LDD_XMDTGLB xmb
+        LEFT JOIN LY_LDD_FJGLB fj ON xmb.ID = fj.SSBH
+        ORDER BY FBSJ DESC
+    </select>
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT * FROM (
+        SELECT xmdtb.*,NULL as YHID FROM (SELECT cpb.* FROM (SELECT jscdb.CDBH from (
+        SELECT jsb.JSID FROM LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH WHERE YHID = #{userId}
+        ) t
+        LEFT JOIN LY_LDD_JSCDB jscdb ON t.JSID = jscdb.JSBH where jscdb.CDBH LIKE '%projectmap%'
+        ) tem
+        LEFT JOIN LY_LDD_CDQXB cdqxb ON tem.CDBH = cdqxb.CDBH
+        LEFT JOIN LY_LDD_CPLXGLB cpb ON cdqxb.QXBH = cpb.CPLXBH) tem1
+        LEFT JOIN LY_LDD_XMDTGLB xmdtb ON tem1.CPLXMC = xmdtb.XMLX
+        WHERE xmdtb.XMZT = 1
+        union
+        select t3.* from (
+        select t.*,t2.YHID from LY_LDD_XMDTGLB t left join LY_LDD_XMDTQXb t2 on t2.XMDTID = t.ID
+        WHERE XMZT = 1
+        ) t3 where t3.yhid like CONCAT(concat('%',#{userId,jdbcType=VARCHAR}),'%'))
+        ORDER BY FBSJ DESC
+<!--        SELECT xmdtb.* FROM (SELECT cpb.* FROM (SELECT jscdb.CDBH from (SELECT jsb.JSID FROM LY_LDD_YHB yhb-->
+<!--        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH WHERE YHID = #{userId}) t-->
+<!--        LEFT JOIN LY_LDD_JSCDB jscdb ON t.JSID = jscdb.JSBH where jscdb.CDBH LIKE '%projectmap%') tem-->
+<!--        LEFT JOIN LY_LDD_CDQXB cdqxb ON tem.CDBH = cdqxb.CDBH-->
+<!--        LEFT JOIN LY_LDD_CPLXGLB cpb ON cdqxb.QXBH = cpb.CPLXBH) tem1-->
+<!--        LEFT JOIN LY_LDD_XMDTGLB xmdtb ON tem1.CPLXMC = xmdtb.XMLX-->
+<!--        ORDER BY FBSJ DESC-->
+    </select>
+
+    <select id="queryByKeywords" resultMap="BaseResultMap" parameterType="java.lang.String">
+<!--        SELECT xmdtb.* FROM (SELECT cpb.* FROM (SELECT jscdb.CDBH from (SELECT jsb.JSID FROM LY_LDD_YHB yhb-->
+<!--        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH WHERE YHID = #{userId}) t-->
+<!--        LEFT JOIN LY_LDD_JSCDB jscdb ON t.JSID = jscdb.JSBH where jscdb.CDBH LIKE '%projectmap%') tem-->
+<!--        LEFT JOIN LY_LDD_CDQXB cdqxb ON tem.CDBH = cdqxb.CDBH-->
+<!--        LEFT JOIN LY_LDD_CPLXGLB cpb ON cdqxb.QXBH = cpb.CPLXBH) tem1-->
+<!--        LEFT JOIN LY_LDD_XMDTGLB xmdtb ON tem1.CPLXMC = xmdtb.XMLX-->
+        SELECT * FROM (SELECT xmdtb.*,NULL as YHID FROM (SELECT cpb.* FROM (SELECT jscdb.CDBH from (
+        SELECT jsb.JSID FROM LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH WHERE YHID = #{userId}
+        ) t
+        LEFT JOIN LY_LDD_JSCDB jscdb ON t.JSID = jscdb.JSBH where jscdb.CDBH LIKE '%projectmap%'
+        ) tem
+        LEFT JOIN LY_LDD_CDQXB cdqxb ON tem.CDBH = cdqxb.CDBH
+        LEFT JOIN LY_LDD_CPLXGLB cpb ON cdqxb.QXBH = cpb.CPLXBH) tem1
+        LEFT JOIN LY_LDD_XMDTGLB xmdtb ON tem1.CPLXMC = xmdtb.XMLX
+        union
+        select t3.* from (
+        select t.*,t2.YHID from LY_LDD_XMDTGLB t left join LY_LDD_XMDTQXb t2 on t2.XMDTID = t.ID
+        WHERE XMZT = '1'
+        ) t3 where t3.yhid like CONCAT(concat('%',#{userId,jdbcType=VARCHAR}),'%'))
+        <where>
+            XMZT = '1'
+            <if test="keywords != null">
+                AND (XMMC LIKE CONCAT(concat('%',#{keywords,jdbcType=VARCHAR}),'%')
+                OR XMZZ LIKE CONCAT(concat('%',#{keywords,jdbcType=VARCHAR}),'%'))
+            </if>
+            <if test="type != null">
+                AND XMLX = #{type}
+            </if>
+            <if test="area != null">
+                AND XMSSDQ = #{area}
+            </if>
+        </where>
+        ORDER BY FBSJ DESC
+    </select>
+
+    <update id="updateProjectName">
+        update LY_LDD_XMDTGLB
+        set XMMC = #{changeProjectName}
+        <where>
+            ID = #{projectId}
+        </where>
+    </update>
+
+    <select id="queryById" resultMap="ProjectResultMap">
+        SELECT xmb.ID,xmb.FBSJ,xmb.FBYH,xmb.XMMC,xmb.XMLJ,xmb.XMSSDQ,xmb.XMLX,xmb.XMBBH,xmb.XMNR,xmb.XMFM,xmb.XMZT,xmb.XMZZ,fj.FJMC,fj.SSBH,fj.FJDX,fj.FJBH
+        from LY_LDD_XMDTGLB xmb LEFT JOIN LY_LDD_FJGLB fj ON xmb.ID = fj.SSBH
+        <where>
+            xmb.ID = #{projectId}
+        </where>
+    </select>
+
+    <select id="queryAll" resultMap="ProjectResultMap">
+        select xmb.*,fj.FJMC,fj.SSBH,fj.FJDX,fj.FJBH
+        from LY_LDD_XMDTGLB xmb
+        LEFT JOIN LY_LDD_FJGLB fj
+        ON xmb.ID = fj.SSBH
+        <where>
+            <if test="userId != null">
+                AND FBYH = #{userId}
+            </if>
+            <if test="projectStatus != null">
+                AND XMZT = #{projectStatus}
+            </if>
+            <if test="projectStatus == null">
+                AND XMZT = '1'
+            </if>
+        </where>
+        ORDER BY FBSJ DESC
+    </select>
+
+    <select id="queryProduceSumByType" resultType="String">
+        SELECT COUNT(*)
+        from LY_LDD_XMDTGLB xmb
+        WHERE xmb.XMLX = #{produceType}
+    </select>
+
+    <select id="queryPageByProduceType" resultMap="ProjectResultMap">
+        select
+        xmb.* from LY_LDD_XMDTGLB xmb
+        <where>
+            xmb.XMLX = #{produceTypeName}
+        </where>
+        ORDER BY xmb.FBSJ DESC
+    </select>
+
+<!--    后台项目地图按条件搜索-->
+    <select id="queryByAdmin" resultMap="BaseResultMap">
+        select xmb.* from LY_LDD_XMDTGLB xmb
+        <where>
+            xmb.XMZT = '1'
+            <if test="projectName != null and projectName != ''">
+                AND xmb.XMMC like CONCAT(concat('%',#{projectName,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="version != null and version != ''">
+                AND xmb.XMBBH = #{version}
+            </if>
+            <if test="area != null and area != ''">
+                AND xmb.XMSSDQ = #{area}
+            </if>
+            <if test="projectType != null and projectType != ''">
+                AND xmb.XMLX = #{projectType}
+            </if>
+        </where>
+        ORDER BY xmb.FBSJ DESC
+    </select>
+</mapper>

@@ -1,0 +1,11 @@
+/target/
+/logs/
+/.classpath
+/.project
+/.springBeans
+/.settings/
+/transaction-logs/
+.idea/
+*.iml
+/.apt_generated/
+

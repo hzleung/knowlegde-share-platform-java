@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.ArticleManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.ArticleManagement">
+        <id column="ID" property="articleId" />
+        <result column="FBSJ" property="articlePublicTime" />
+        <result column="FBYH" property="userId" />
+        <result column="WZBT" property="title" />
+        <result column="WZSSBQ" property="label" />
+        <result column="WZSSFL" property="type" />
+        <result column="DZL" property="articleLike" />
+        <result column="PLS" property="articleReview" />
+        <result column="LLL" property="articleVisit" />
+        <result column="YHTX" property="articleUserAvatar" />
+        <result column="WZNR" property="content" />
+        <result column="FJ" property="files" />
+        <result column="FM" property="banner" />
+        <result column="FBYHM" property="author" />
+        <result column="LIKECOUNT" property="likeCount" />
+        <result column="SFDZ" property="isLike" />
+    </resultMap>
+
+    <resultMap id="ArticleResultMap" type="com.ly.cloud.user.dto.ArticleDTO">
+        <id column="ID" property="articleId" />
+        <result column="FBSJ" property="articlePublicTime" />
+        <result column="FBYH" property="userId" />
+        <result column="WZBT" property="title" />
+        <result column="WZSSBQ" property="label" />
+        <result column="WZSSFL" property="type" />
+        <result column="DZL" property="articleLike" />
+        <result column="PLS" property="articleReview" />
+        <result column="LLL" property="articleVisit" />
+        <result column="YHTX" property="articleUserAvatar" />
+        <result column="WZNR" property="content" />
+        <result column="FJ" property="files" />
+        <result column="FM" property="banner" />
+        <result column="FBYHM" property="author" />
+        <result column="LIKECOUNT" property="likeCount" />
+        <result column="WZZT" property="articleStatus" />
+        <result column="SFDZ" property="isLike" />
+        <collection property="articleFiles" ofType="com.ly.cloud.user.entity.FileManagement">
+            <result column="FJBH" property="fileId"></result>
+            <result column="FJMC" property="fileName"></result>
+            <result column="FJHZM" property="fileType"></result>
+            <result column="FJCCLJ" property="filePath"></result>
+            <result column="FJDX" property="fileSize"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, FBSJ, FBYH, WZBT, WZSSBQ, WZSSFL, DZL, PLS, LLL, YHTX, WZNR, FJ, FM, FBYHM, LIKECOUNT, WZZT, SFDZ
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_WZGLB
+    </select>
+
+    <select id="selectArticlePage" resultMap="ArticleResultMap">
+        with temp as(
+        select t.id,count(d.id) likeCount from  ly_ldd_wzglb t
+        left  join ly_ldd_dzb d on t.id = d.dzwzid
+        group by t.id
+        ) select t.ID, t.FBSJ, t.FBYH, t.WZBT, t.WZSSBQ, t.WZSSFL, t.DZL, t.PLS, t.LLL, t.FJ, t.FM, t.FBYHM, t.WZZT, t.SFDZ,t1.likeCount, yhb.YHTX
+        from LY_LDD_WZGLB t left join temp t1 on t.id =t1.id
+        LEFT JOIN LY_LDD_YHB yhb ON t.FBYH = yhb.YHID
+        <where>
+            AND t.WZZT = '1'
+            <if test="requireType != null and requireType == 'homePage'">
+                AND (t.WZSSFL = '视觉' OR t.WZSSFL = '前端' OR t.WZSSFL = '交互')
+            </if>
+            <if test="requireType != null and requireType == 'sharePage'">
+                AND (t.WZSSFL = '读书' OR t.WZSSFL = '团队' OR t.WZSSFL = '总结')
+            </if>
+        </where>
+        ORDER BY FBSJ DESC
+    </select>
+
+    <select id="selectHotArticlePage" resultMap="ArticleResultMap">
+        with temp as(
+        select t.id,count(d.id) likeCount from  ly_ldd_wzglb t
+        left  join ly_ldd_dzb d on t.id = d.dzwzid
+        group by t.id
+        ) select t.ID, t.FBSJ, t.FBYH, t.WZBT, t.WZSSBQ, t.WZSSFL, t.DZL, t.PLS, t.LLL, t.FJ, t.FM, t.FBYHM, t.WZZT, t.SFDZ,t1.likeCount, yhb.YHTX
+        from LY_LDD_WZGLB t left join temp t1 on t.id =t1.id
+        LEFT JOIN LY_LDD_YHB yhb ON t.FBYH = yhb.YHID
+        WHERE t.WZZT = '1' AND (t.WZSSFL = '视觉' OR t.WZSSFL = '前端' OR t.WZSSFL = '交互') ORDER BY t.LLL DESC
+    </select>
+
+
+    <select id="queryAll" resultMap="ArticleResultMap">
+        with temp as(
+        select t.id,count(d.id) likeCount from  ly_ldd_wzglb t
+        left  join ly_ldd_dzb d on t.id = d.dzwzid
+        group by t.id
+        ) select t.*,t1.likeCount
+        from LY_LDD_WZGLB t left join temp t1 on t.id =t1.id
+        WHERE t.WZZT = #{articleStatus} ORDER BY FBSJ DESC
+    </select>
+
+    <select id="queryAllByUserId" resultMap="ArticleResultMap">
+        SELECT t1.*, fjb.* FROM (with temp as(
+            select t.id,count(d.id) likeCount from  ly_ldd_wzglb t
+            left  join ly_ldd_dzb d on t.id = d.dzwzid
+            group by t.id)
+            select t.*,t1.likeCount from LY_LDD_WZGLB t
+            left join temp t1 on t.id =t1.id
+            WHERE t.WZZT = #{articleStatus} AND t.FBYH = #{userId}) t1
+        LEFT JOIN LY_LDD_FJGLB fjb ON t1.ID = fjb.SSBH
+        ORDER BY FBSJ DESC
+    </select>
+<!--    <select id="queryById" resultMap="ArticleResultMap">-->
+<!--        with m as (-->
+<!--        select ID,FBSJ,FBYH,WZBT,WZSSBQ,WZSSFL,FBYHM,SFDZ,level p_level, regexp_substr(FJ , '[^,]+', 1, level) FJBH-->
+<!--        from LY_LDD_WZGLB-->
+<!--        connect by level &lt;= regexp_count(FJ , '[^,]+')-->
+<!--        and prior id = id-->
+<!--        and prior dbms_random.value is not null-->
+<!--        ),-->
+<!--        temp as(-->
+<!--        select t.id,count(d.id) likeCount from  ly_ldd_wzglb t-->
+<!--        left  join ly_ldd_dzb d on t.id = d.dzwzid-->
+<!--        group by t.id-->
+<!--        )-->
+<!--        SELECT tab.*,t1.WZNR,tem.likeCount FROM (-->
+<!--        select m.ID,m.FBSJ,m.FBYHM,m.WZBT,m.WZSSBQ,m.WZSSFL,m.SFDZ,fjb.FJMC-->
+<!--        from m left join LY_LDD_FJGLB fjb on m.FJBH = fjb.FJBH-->
+<!--        group by m.ID,m.FBSJ,m.FBYHM,m.WZBT,m.WZSSBQ,m.WZSSFL,m.SFDZ,fjb.FJMC-->
+<!--        ) tab-->
+<!--        LEFT JOIN temp tem on tem.id = tab.id-->
+<!--        LEFT JOIN LY_LDD_WZGLB t1 on t1.ID = tab.ID-->
+<!--        where tab.id = #{articleId}-->
+<!--        ORDER BY tab.id-->
+<!--    </select>-->
+    <select id="queryById" resultMap="ArticleResultMap">
+        with tem1 as(select t.id,count(d.id) likeCount from ly_ldd_wzglb t
+        left  join ly_ldd_dzb d on t.id = d.dzwzid
+        group by t.id)
+        SELECT tab.*,tem.likeCount,yhb.YHTX FROM (SELECT wzb.ID,wzb.FBSJ,wzb.FBYH,wzb.WZBT,wzb.WZSSBQ,wzb.WZSSFL,wzb.LLL,wzb.WZNR,wzb.FM,wzb.FBYHM,wzb.SFDZ,wzb.WZZT,fj.FJMC,fj.SSBH,fj.FJDX,fj.FJBH
+        from LY_LDD_WZGLB wzb LEFT JOIN LY_LDD_FJGLB fj ON wzb.ID = fj.SSBH) tab
+        LEFT JOIN tem1 tem on tem.id = tab.id
+        LEFT JOIN LY_LDD_YHB yhb ON tab.FBYH = yhb.YHID
+        <where>
+            tem.ID = #{articleId}
+        </where>
+    </select>
+
+    <select id="queryTopTen" resultMap="ArticleResultMap">
+        select
+        wzb.ID,wzb.WZBT,wzb.FM
+        from LY_LDD_WZGLB wzb
+        where rownum &lt;= 8 AND wzb.WZZT = '1' ORDER BY wzb.LLL DESC
+    </select>
+
+    <select id="queryByKeywords" resultMap="ArticleResultMap" parameterType="java.lang.String">
+        with temp as(
+        select t.id,count(d.id) likeCount from  ly_ldd_wzglb t
+        left  join ly_ldd_dzb d on t.id = d.dzwzid
+        group by t.id
+        ) select t.*,t1.likeCount from LY_LDD_WZGLB t left join temp t1 on t.id =t1.id
+        <where>
+            AND t.WZZT = '1'
+            <if test="keywords != null">
+                AND t.WZBT LIKE CONCAT(concat('%',#{keywords,jdbcType=VARCHAR}),'%') OR t.FBYHM LIKE CONCAT(concat('%',#{keywords,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="articleType != null">
+                AND t.WZSSFL LIKE CONCAT(concat('%',#{articleType,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="articleLabel != null">
+                AND t.WZSSBQ LIKE CONCAT(concat('%',#{articleLabel,jdbcType=VARCHAR}),'%')
+            </if>
+        </where>
+        ORDER BY FBSJ DESC
+    </select>
+
+    <update id="updateArticleVisit">
+        update LY_LDD_WZGLB
+        set lll = #{lll}
+        <where>
+            ID = #{id}
+        </where>
+    </update>
+
+    <update id="updateIsLikeById">
+        update LY_LDD_WZGLB
+        set SFDZ = #{hadlike}
+        <where>
+            ID = #{articleId}
+        </where>
+    </update>
+
+<!--    数据汇总-->
+    <select id="queryData" resultType="Map">
+        WITH tem as (SELECT COUNT(*) as "toolCount" from LY_LDD_GJGLB),
+        jlb as (SELECT COUNT(*) as "recordCount" FROM LY_LDD_FWJLB jlb WHERE TO_CHAR(jlb.FWSJ, 'yyyy-mm-dd') = TO_CHAR(SYSDATE, 'yyyy-mm-dd'))
+        SELECT tem.*,wzb.*,jlb.*
+        from (SELECT COUNT(*) as "articleCount" from LY_LDD_WZGLB) wzb
+        LEFT JOIN tem ON '1' = '1'
+		LEFT JOIN jlb ON '1' = '1'
+    </select>
+
+    <select id="queryArticleType" resultType="java.lang.String">
+        SELECT DISTINCT WZSSFL
+        FROM LY_LDD_WZGLB
+    </select>
+
+    <select id="queryArticleSumByType" resultType="String">
+        SELECT COUNT(*)
+        from LY_LDD_WZGLB wzb
+        WHERE wzb.WZSSFL = #{articleType}
+    </select>
+
+<!--    获取访问表的数据，按月份输出-->
+    <select id="queryRecordBymonth" resultType="Map">
+        SELECT TO_CHAR(jlb.FWSJ,'YYYY-MM') "month",COUNT(*) "count"
+        FROM LY_LDD_FWJLB jlb
+        WHERE TO_CHAR(jlb.FWSJ, 'yyyy') = TO_CHAR(SYSDATE, 'yyyy')
+        GROUP BY TO_CHAR(jlb.FWSJ,'YYYY-MM')
+    </select>
+
+<!--    获取访问表的数据，按周输出-->
+    <select id="queryRecordByWeek" resultType="Map">
+        SELECT TO_CHAR(jlb.FWSJ,'MM-DD') "date",COUNT(*) "count"
+        FROM LY_LDD_FWJLB jlb
+        WHERE jlb.FWSJ
+        BETWEEN to_date(to_char(sysdate-6,'YYYY-MM-DD'),'YYYY-MM-DD')
+        and to_date(to_char(sysdate+1,'YYYY-MM-DD'),'YYYY-MM-DD')
+        GROUP BY TO_CHAR(jlb.FWSJ,'MM-DD')
+        ORDER BY TO_CHAR(jlb.FWSJ,'MM-DD')
+    </select>
+
+</mapper>

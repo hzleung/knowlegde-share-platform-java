@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.DepartmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.Department">
+        <id column="PKID" property="departmentId" />
+        <result column="BMDM" property="departmentCode" />
+        <result column="BMMC" property="departmentName" />
+        <result column="BMJC" property="departmentAbbreviation" />
+        <result column="BMLB" property="departmentType" />
+        <result column="PXH" property="sortNumber" />
+        <result column="ZT" property="status" />
+        <result column="ZHXGSJ" property="lastChangeTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        PKID, BMDM, BMMC, BMJC, BMLB, PXH, ZT, ZHXGSJ
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_BMLBB
+    </select>
+
+</mapper>

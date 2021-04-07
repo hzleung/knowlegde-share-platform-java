@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.MaterialTypeManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.MaterialTypeManagement">
+        <id column="SCLXID" property="materialTypeId" />
+        <result column="SCLXMC" property="materialTypeName" />
+        <result column="CJSJ" property="materialTypeCreateTime" />
+        <result column="SCLXZT" property="materialTypeStatus" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        SCLXID, SCLXMC, CJSJ, SCLXZT
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_SCLXB
+    </select>
+
+<!--    获取素材类型列表-->
+    <select id="getMaterialTypeList" parameterType="String" resultType="java.lang.String">
+        select
+    	sclxb.SCLXMC
+    	from LY_LDD_SCLXB sclxb
+    </select>
+
+</mapper>

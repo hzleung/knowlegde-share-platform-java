@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.LikeManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.LikeManagement">
+        <id column="ID" property="likeId" />
+        <result column="DZSJ" property="likeTime" />
+        <result column="DZWZID" property="likeArticleId" />
+        <result column="DZPLID" property="likeReviewId" />
+        <result column="FBYHID" property="likerUserId" />
+        <result column="DZDXID" property="targetId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, DZSJ, DZWZID, DZPLID, FBYHID, DZDXID
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_DZB
+    </select>
+
+    <select id="ArticleLikeCount" resultType="String">
+        select
+        count(*)
+        from LY_LDD_DZB
+        <where>
+            DZWZID = #{likeArticleId}
+        </where>
+    </select>
+
+    <select id="queryByArticleIdAndUserId" resultType="String">
+        SELECT ID
+        FROM LY_LDD_DZB
+        <where>
+            DZWZID = #{likeArticleId} AND FBYHID = #{likerUserId}
+        </where>
+    </select>
+
+    <select id="queryLikeByArticleIdAndUserId" parameterType="string" resultType="java.lang.Boolean">
+        SELECT count(id)
+        FROM LY_LDD_DZB
+        WHERE
+            DZWZID = #{articleId} AND FBYHID = #{userId}
+    </select>
+
+</mapper>

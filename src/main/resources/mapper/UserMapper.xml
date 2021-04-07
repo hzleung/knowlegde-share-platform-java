@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.User">
+        <id column="YHID" property="userId" />
+        <result column="IP" property="userIP" />
+        <result column="YHM" property="userName" />
+        <result column="MM" property="password" />
+        <result column="NC" property="nickName" />
+        <result column="YHYX" property="userEmail" />
+        <result column="YHSJ" property="phone" />
+        <result column="BMBH" property="apartmentNumber" />
+        <result column="BMMC" property="apartmentName" />
+        <result column="YHZW" property="userPost" />
+        <result column="ZCSJ" property="registerTime" />
+        <result column="SCDLSJ" property="lastLoginTime" />
+        <result column="YHSR" property="userBirthday" />
+        <result column="YHNL" property="userAge" />
+        <result column="YHTX" property="userAvatar" />
+        <result column="YHZT" property="userStatus" />
+        <result column="YHXB" property="userSex" />
+        <result column="YHJYZ" property="userXP" />
+        <result column="YHLX" property="userType" />
+        <result column="JSMC" property="userTypeName" />
+    </resultMap>
+    <resultMap id="AuthorityMap" type="com.ly.cloud.user.dto.AuthorityDTO">
+        <id column="JSID" property="roleId" />
+        <result column="JSMC" property="roleName" />
+        <result column="CDBH" property="menuId" />
+        <result column="CDMC" property="menuName" />
+        <collection property="produceType" ofType="com.ly.cloud.user.entity.ProduceType">
+            <result column="CPLXBH" property="produceTypeId" />
+            <result column="CPLXMC" property="produceTypeName" />
+            <result column="CPLXCJSJ" property="produceTypeTime" />
+            <result column="CPLXZT" property="produceTypeStatus" />
+            <result column="CPLXBBH" property="produceTypeVersion" />
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        YHID, IP, YHM, MM, NC, YHYX, YHSJ, BMBH, BMMC, YHZW, ZCSJ, SCDLSJ, YHSR, YHNL, YHTX, YHZT, YHXB, YHJYZ, YHLX
+    </sql>
+    
+<!--    <select id="selectPage" resultMap="BaseResultMap">-->
+<!--    	select -->
+<!--    	<include refid="Base_Column_List"></include>-->
+<!--    	from LY_LDD_YHB-->
+<!--    </select> -->
+
+    <select id="selectPage" resultType="Map">
+        SELECT
+        yhb.YHID as "userId",
+        yhb.YHM as "userName",
+        yhb.BMMC as "apartmentName",
+        yhb.YHYX as "userEmail",
+        yhb.SCDLSJ as "lastLoginTime",
+        yhb.YHJYZ as "userXP",
+        yhb.YHTX as "userAvatar",
+        yhb.YHZT as "userStatus",
+        jsb.JSMC as "userTypeName"
+        FROM LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb
+        ON yhb.YHLX = jsb.JSBH
+        ORDER BY yhb.YHZT ASC
+    </select>
+<!--登录查询-->
+    <select id="selectUserByYhyxAndMM" resultMap="BaseResultMap">
+<!--        select-->
+<!--        yhb.YHID as "userId",-->
+<!--        yhb.IP as "userIP",-->
+<!--        yhb.YHM as "userName",-->
+<!--        yhb.NC as "nickName",-->
+<!--        yhb.BMMC as "apartmentName",-->
+<!--        yhb.BMBH as "apartmentNumber",-->
+<!--        yhb.YHZW as "userPost",-->
+<!--        yhb.YHSJ as "phone",-->
+<!--        yhb.ZCSJ as "registerTime",-->
+<!--        yhb.YHYX as "userEmail",-->
+<!--        yhb.SCDLSJ as "lastLoginTime",-->
+<!--        yhb.YHJYZ as "userXP",-->
+<!--        yhb.YHNL as "userAge",-->
+<!--        yhb.YHSR as "userBirthday",-->
+<!--        yhb.YHTX as "userAvatar",-->
+<!--        yhb.YHXB as "userSex",-->
+<!--        yhb.YHZT as "userStatus",-->
+<!--        jsb.JSMC as userTypeName,-->
+<!--        yhb.YHLX as "userType",-->
+<!--        jsb.JSMC as "userTypeName"-->
+<!--        FROM LY_LDD_YHB yhb-->
+<!--        LEFT JOIN LY_LDD_JSGLB jsb-->
+<!--        ON yhb.YHLX = jsb.JSBH-->
+<!--        where yhyx = #{yhyx} and mm = #{mm} OR yhm = #{yhyx} and mm = #{mm}-->
+        select
+        yhb.YHID,
+        yhb.IP,
+        yhb.YHM,
+        yhb.NC,
+        yhb.BMMC,
+        yhb.BMBH,
+        yhb.YHZW,
+        yhb.YHSJ,
+        yhb.ZCSJ,
+        yhb.YHYX,
+        yhb.SCDLSJ,
+        yhb.YHJYZ,
+        yhb.YHNL,
+        yhb.YHSR,
+        yhb.YHTX,
+        yhb.YHXB,
+        yhb.YHZT,
+        jsb.JSMC,
+        yhb.YHLX,
+        jsb.JSMC
+        from LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb
+        ON yhb.YHLX = jsb.JSBH
+        where yhyx = #{yhyx} and mm = #{mm} OR yhm = #{yhyx} and mm = #{mm}
+    </select>
+
+    <select id="selectUserByYhyx" resultMap="BaseResultMap">
+        select
+        *
+        from LY_LDD_YHB  where yhyx = #{yhyx} OR yhm = #{yhyx}
+    </select>
+
+    <select id="selectUserByuserId" resultMap="BaseResultMap">
+        select
+        *
+        from LY_LDD_YHB  where YHID = #{userId}
+    </select>
+
+    <update id="updatePassword">
+        update LY_LDD_YHB
+        set MM = #{changePassword}
+        <where>
+            yhyx = #{userEmail}
+        </where>
+    </update>
+
+    <update id="updateXP">
+        update LY_LDD_YHB
+        set YHJYZ = #{xp}
+        <where>
+            YHID = #{userId}
+        </where>
+    </update>
+
+    <update id="updateUserAvatar">
+        update LY_LDD_YHB
+        set YHTX = #{userAvatar}
+        <where>
+            YHID = #{userId}
+        </where>
+    </update>
+
+    <update id="updateUserStatus">
+        update LY_LDD_YHB
+        set YHZT = #{userStatus} , YHLX = #{userType}
+        <where>
+            YHID = #{userId}
+        </where>
+    </update>
+
+    <update id="updateLastLoginTime">
+        update LY_LDD_YHB
+        set SCDLSJ = #{lastLoginTime}
+        <where>
+            YHYX = #{yhyx}
+        </where>
+    </update>
+
+    <select id="queryByKeywords" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        *
+        from LY_LDD_YHB
+        <where>
+            <if test="userName != null">
+                AND YHM LIKE CONCAT(concat('%',#{userName,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="department != null">
+                AND BMMC = #{department}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectUserAvatarByUserId" resultType="String">
+        select
+        y.YHTX
+        from LY_LDD_YHB y
+        <where>
+            y.YHID = #{userId}
+        </where>
+    </select>
+
+    <select id="queryAuthority" resultType="Map">
+        SELECT cdb.CDBH as "menuId", cdb.CDMC as "menuName" FROM (SELECT jscdb.CDBH from (SELECT jsb.JSID FROM LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH WHERE YHID = #{userId}) t
+        LEFT JOIN LY_LDD_JSCDB jscdb ON t.JSID = jscdb.JSBH) t2
+        LEFT JOIN LY_LDD_CDGLB cdb ON t2.CDBH = cdb.CDBH
+    </select>
+
+<!--    根据菜单编号（menuId）来查询对应项目地图的产品类型权限-->
+    <select id="getProduceTypeAuthority" resultType="Map">
+        SELECT
+        cpb.CPLXBH as "produceTypeId",
+        cpb.CPLXMC as "produceTypeName",
+        cpb.CPLXCJSJ as "produceTypeTime",
+        cpb.CPLXZT as "produceTypeStatus",
+        cpb.CPLXBBH as "produceTypeVersion"
+        FROM LY_LDD_CDQXB cdqxb
+		LEFT JOIN LY_LDD_CPLXGLB cpb ON cpb.CPLXBH = cdqxb.QXBH
+		<where>
+            cdqxb.CDBH = #{menuId}
+        </where>
+    </select>
+
+    <select id="getAdminAuthority" resultType="Map">
+        SELECT jsb.JSID as "roleId",jsb.JSMC as "roleName",jscdb.CDBH as "menuId",cdb.CDMC as "menuName" from LY_LDD_JSGLB jsb
+        LEFT JOIN LY_LDD_JSCDB jscdb ON jsb.JSID = jscdb.JSBH
+        LEFT JOIN LY_LDD_CDGLB cdb ON jscdb.CDBH = cdb.CDBH
+    </select>
+
+    <select id="queryMenuTypeList" resultType="Map">
+        SELECT qxb.QXBH as "menuTypeId",qxb.QXMC as "menuTypeName"
+        FROM LY_LDD_CDQXB cdqxb
+        LEFT JOIN LY_LDD_QXGLB qxb ON cdqxb.QXBH = qxb.QXBH
+        WHERE cdqxb.CDBH = #{menuId}
+    </select>
+
+<!--    循环插入之前,先删除存在的数据-->
+    <delete id="deleteMapAuthority">
+         DELETE FROM LY_LDD_CDQXB cdqxb
+         <where>
+             cdqxb.CDBH = #{menuId}
+         </where>
+    </delete>
+<!--    根据角色循环插入权限-->
+    <insert id="setProjectTypeAuthority" parameterType="java.util.List">
+        insert into
+        LY_LDD_CDQXB
+        (CDBH,QXBH)
+        (
+        <foreach collection="list" item="item" index="index" separator="union">
+        (select
+        #{item.menuId, jdbcType=VARCHAR},
+        #{item.produceTypeId, jdbcType=VARCHAR}
+        from dual)
+        </foreach>
+        )
+    </insert>
+
+<!--    查询是否有项目地图的权限-->
+    <select id="getProjectMapMenu" resultType="java.lang.String">
+        SELECT jscdb.cdbh FROM LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH
+        LEFT JOIN LY_LDD_JSCDB jscdb ON jscdb.JSBH = jsb.JSID
+        WHERE yhb.YHID = #{userId} AND jscdb.CDBH like '%projectmap%'
+    </select>
+
+<!--    查询某人是否有特殊权限-->
+    <select id="getSpecialAuthority" resultType="Map">
+        SELECT xmqxb.*
+        FROM LY_LDD_XMDTQXB xmqxb
+        WHERE xmqxb.YHID = #{userId}
+    </select>
+
+<!--    设置某人的项目地图特殊权限,循环插入-->
+    <insert id="setSpecialAuthority"  parameterType="java.util.List">
+        insert
+        into LY_LDD_XMDTQXB(XMDTID, YHID, JSID, CJSJ)
+        (
+        <foreach collection="userList" item="item" index="index" separator="union">
+            (select
+            #{item.projectId, jdbcType=VARCHAR},
+            #{item.userId, jdbcType=VARCHAR},
+            #{item.roleId, jdbcType=VARCHAR},
+            #{item.createdTime, jdbcType=VARCHAR}
+            from dual)
+        </foreach>
+        )
+    </insert>
+
+<!--    删除某个人的项目地图特殊权限-->
+    <delete id="deleteSpecialAuthority">
+        delete
+        from LY_LDD_XMDTQXB
+        <where>
+            XMDTID = #{projectId} AND YHID = #{userId}
+        </where>
+    </delete>
+
+<!--    查找内部员工和实施人员角色的所有人-->
+    <select id="queryAuthorityuserList" resultType="Map">
+        SELECT yhb.YHM as "userName",yhb.YHID as "userId"
+        from LY_LDD_YHB yhb
+        WHERE yhb.YHLX = '1' OR yhb.YHLX = '2'
+    </select>
+
+<!--    查找该用户对应的项目地图是否已经存在特殊权限表-->
+    <select id="queryByUserIdAndProjectId" resultType="Map">
+        SELECT xmqxb.*
+        from LY_LDD_XMDTQXB xmqxb
+        WHERE xmqxb.YHID = #{userId} AND xmqxb.XMDTID = #{projectId}
+    </select>
+
+<!--    删除用户时，需要删除对应的特殊权限，因此只需要通过userId进行删除-->
+    <delete id="deleteSpecialAuthorityByUserId">
+        delete
+        from LY_LDD_XMDTQXB
+        <where>
+            YHID = #{userId}
+        </where>
+    </delete>
+
+<!--    获取某人的用户类型-->
+    <select id="getUserType" parameterType="String" resultType="java.lang.String">
+        SELECT
+        yhb.YHLX
+        FROM LY_LDD_YHB yhb
+        WHERE yhb.YHID = #{userId}
+    </select>
+
+</mapper>

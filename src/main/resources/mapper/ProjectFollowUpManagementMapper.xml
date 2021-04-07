@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.ProjectFollowUpManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.ProjectFollowUpManagement">
+        <id column="XMID" property="projectId" />
+        <result column="XMMC" property="projectName" />
+        <result column="XMSSBM" property="projectDepartment" />
+        <result column="TJYHID" property="submitterId" />
+        <result column="TJSJ" property="submitTime" />
+        <result column="XMFZR" property="projectDirector" />
+        <result column="ZCSJ" property="checkTime" />
+        <result column="SCZCSJ" property="lastCheckTime" />
+        <result column="ZT" property="status" />
+        <result column="SJTDZ" property="designUrl" />
+        <result column="XMFWDZ" property="visitUrl" />
+    </resultMap>
+
+    <resultMap id="FollowUpResultMap" type="com.ly.cloud.user.dto.FollowUpDTO">
+        <id column="XMID" property="projectId" />
+        <result column="XMMC" property="projectName" />
+        <result column="XMSSBM" property="projectDepartment" />
+        <result column="TJYHID" property="submitterId" />
+        <result column="TJSJ" property="submitTime" />
+        <result column="XMFZR" property="projectDirector" />
+        <result column="ZCSJ" property="checkTime" />
+        <result column="SCZCSJ" property="lastCheckTime" />
+        <result column="ZT" property="status" />
+        <result column="SJTDZ" property="designUrl" />
+        <result column="XMFWDZ" property="visitUrl" />
+        <result column="YHM" property="submitter" />
+        <collection property="report" ofType="com.ly.cloud.user.entity.FileManagement">
+            <result column="FJBH" property="fileId"></result>
+            <result column="FJMC" property="fileName"></result>
+            <result column="FJHZM" property="fileType"></result>
+            <result column="FJCCLJ" property="filePath"></result>
+            <result column="FJDX" property="fileSize"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        XMID, XMMC, XMSSBM, TJSJ, XMFZR, ZCSJ, SCZCSJ, ZT, SJTDZ, XMFWDZ, TJYHID
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_XMGZB
+    </select>
+
+    <select id="selectAllPage" resultMap="FollowUpResultMap">
+        SELECT gzb.*, yhb.YHM, fjb.*
+        FROM LY_LDD_XMGZB gzb
+        LEFT JOIN LY_LDD_YHB yhb ON gzb.TJYHID = yhb.YHID
+        LEFT JOIN LY_LDD_FJGLB fjb ON fjb.SSBH = gzb.XMID
+        <where>
+            <if test="type == 'currentWeek'">
+                AND gzb.ZCSJ &gt;= TRUNC(NEXT_DAY(SYSDATE-8, 1) + 1)
+                AND gzb.ZCSJ &lt; TRUNC(NEXT_DAY(SYSDATE-8, 1)+7)+1
+            </if>
+            <if test="type == 'unqualified'">
+                AND gzb.ZT = 2
+            </if>
+            <if test="type == 'recentlySubmit'"></if>
+            <if test="type == 'history'">
+                AND gzb.ZT = 1
+            </if>
+        </where>
+        ORDER BY gzb.TJSJ DESC
+    </select>
+
+    <!--    搜索-->
+    <select id="queryByKeywords" resultMap="FollowUpResultMap">
+        SELECT gzb.*, yhb.YHM, fjb.*
+        FROM LY_LDD_XMGZB gzb
+        LEFT JOIN LY_LDD_YHB yhb
+        ON gzb.TJYHID = yhb.YHID
+        LEFT JOIN LY_LDD_FJGLB fjb ON fjb.SSBH = gzb.XMID
+        <where>
+            <if test="projectName != null">
+                AND gzb.XMMC LIKE CONCAT(concat('%',#{projectName,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="department != null">
+                AND gzb.XMSSBM = #{department}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND gzb.ZCSJ between to_date(#{startTime}, 'YYYY-MM-DD') and to_date(#{endTime}, 'YYYY-MM-DD') + 1
+            </if>
+            <if test="status != null">
+                AND gzb.ZT = #{status}
+            </if>
+        </where>
+        ORDER BY gzb.TJSJ DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.ProduceTypeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.ProduceType">
+        <id column="CPLXBH" property="produceTypeId" />
+        <result column="CPLXMC" property="produceTypeName" />
+        <result column="CPLXCJSJ" property="produceTypeTime" />
+        <result column="CPLXZT" property="produceTypeStatus" />
+        <result column="CPLXBBH" property="produceTypeVersion" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        CPLXBH, CPLXMC, CPLXCJSJ, CPLXZT, CPLXBBH
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_CPLXGLB
+    </select>
+
+    <!--前台获取所有有权限查看的产品类型-->
+    <select id="queryAll" resultType="Map">
+        SELECT
+        cpb.CPLXBH as "produceTypeId",
+        cpb.CPLXCJSJ as "produceTypeTime",
+        cpb.CPLXMC as "produceTypeName",
+        cpb.CPLXZT as "produceTypeStatus",
+        cpb.CPLXBBH as "produceTypeVersion"
+        FROM (SELECT jscdb.CDBH from (
+        SELECT jsb.JSID FROM LY_LDD_YHB yhb
+        LEFT JOIN LY_LDD_JSGLB jsb ON yhb.YHLX = jsb.JSBH WHERE YHID = #{userId}
+        ) t
+        LEFT JOIN LY_LDD_JSCDB jscdb ON t.JSID = jscdb.JSBH where jscdb.CDBH LIKE '%projectmap%'
+        ) tem
+        LEFT JOIN LY_LDD_CDQXB cdqxb ON tem.CDBH = cdqxb.CDBH
+        LEFT JOIN LY_LDD_CPLXGLB cpb ON cdqxb.QXBH = cpb.CPLXBH
+		union
+		SELECT
+		cpb.CPLXBH as "produceTypeId",
+        cpb.CPLXCJSJ as "produceTypeTime",
+        cpb.CPLXMC as "produceTypeName",
+        cpb.CPLXZT as "produceTypeStatus",
+        cpb.CPLXBBH as "produceTypeVersion"
+		FROM (select t3.XMLX from (
+        select t.*,t2.YHID from LY_LDD_XMDTGLB t left join LY_LDD_XMDTQXb t2 on t2.XMDTID = t.ID
+        WHERE XMZT = '1') t3 where t3.yhid like CONCAT(concat('%',#{userId,jdbcType=VARCHAR}),'%')) tem3
+		LEFT JOIN LY_LDD_CPLXGLB cpb ON cpb.CPLXMC = tem3.XMLX
+    </select>
+
+<!--后台获取所有的产品类型-->
+    <select id="queryAllByAdmin" resultType="Map">
+        SELECT
+        cpb.CPLXBH as "produceTypeId",
+        cpb.CPLXCJSJ as "produceTypeTime",
+        cpb.CPLXMC as "produceTypeName",
+        cpb.CPLXZT as "produceTypeStatus",
+        cpb.CPLXBBH as "produceTypeVersion"
+        from LY_LDD_CPLXGLB cpb
+    </select>
+<!--    根据产品类型和版本号查询对应的项目地图个数-->
+    <select id="queryProjectCountByTypeAndVersion" resultType="java.lang.String">
+        SELECT COUNT(*) count FROM LY_LDD_XMDTGLB WHERE XMLX = #{produceTypeName} AND XMBBH = #{version}
+    </select>
+
+    <select id="queryProduceType" resultType="java.lang.String">
+        SELECT CPLXMC
+        from LY_LDD_CPLXGLB
+    </select>
+
+<!--    插入新的菜单权限-->
+    <insert id="insertProduceTypeAuthority">
+        insert into
+        LY_LDD_CDQXB (CDBH, QXBH)
+        values
+        ('ly-zsfxpt_all_projectmap', #{produceTypeId})
+    </insert>
+
+<!--    删除菜单权限-->
+    <delete id="deleteProduceTypeAuthorityById">
+        delete from
+        LY_LDD_CDQXB cdqxb
+        <where>
+            cdqxb.QXBH = #{id}
+        </where>
+    </delete>
+
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.SchoolAreaManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.SchoolAreaManagement">
+        <id column="GXID" property="schoolId" />
+        <result column="GXMC" property="schoolName" />
+        <result column="SSDQ" property="schoolArea" />
+        <result column="CJSJ" property="createdTime" />
+        <result column="ZT" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        GXID, GXMC, SSDQ, CJSJ, ZT
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_GXDQGLB
+    	ORDER BY CJSJ DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+    	select
+    	*
+    	from LY_LDD_GXDQGLB
+    	<where>
+            ZT = '1'
+        </where>
+        ORDER BY CJSJ DESC
+    </select>
+
+<!--    搜索-->
+    <select id="queryByKeywords" resultMap="BaseResultMap">
+        select
+        *
+        from LY_LDD_GXDQGLB
+        <where>
+            AND ZT = '1'
+            <if test="schoolName != null">
+                AND GXMC LIKE CONCAT(concat('%',#{schoolName,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="area != null">
+                AND SSDQ = #{area}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND CJSJ between to_date(#{startTime}, 'YYYY-MM-DD') and to_date(#{endTime}, 'YYYY-MM-DD')
+            </if>
+        </where>
+        ORDER BY CJSJ DESC
+    </select>
+
+    <select id="queryBySchoolName" parameterType="string" resultType="java.lang.Boolean">
+        SELECT count(GXID)
+        FROM LY_LDD_GXDQGLB
+        WHERE GXMC = #{schoolName}
+    </select>
+
+</mapper>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.TrainTypeManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.TrainTypeManagement">
+        <id column="PXBH" property="trainId" />
+        <result column="PXLX" property="trainType" />
+        <result column="PXLXFL" property="trainRouteType" />
+    </resultMap>
+
+    <resultMap id="TrainResultMap" type="com.ly.cloud.user.dto.TrainDTO">
+        <id column="PXBH" property="trainId" />
+        <result column="PXLX" property="trainType" />
+        <result column="PXLXFL" property="trainRouteType" />
+        <result column="PXDD" property="trainPlace" />
+        <result column="PXJJ" property="trainProfile" />
+        <result column="PXKSSJ" property="trainStartTime" />
+        <result column="PXFBSJ" property="trainPublishTime" />
+        <result column="PXFBYH" property="trainPublishUserId" />
+        <result column="PXFBTX" property="trainPublishUserAvatar" />
+        <result column="PXNR" property="trainContent" />
+        <result column="PXCPJC" property="trainProductProfile" />
+        <result column="FM" property="banner" />
+        <result column="PXSP" property="trainVideo" />
+        <result column="PXFJ" property="trainFiles" />
+        <result column="PXMC" property="trainName" />
+        <result column="LLL" property="trainVisit" />
+        <result column="PXFBYHM" property="author" />
+        <result column="PXZT" property="trainStatus" />
+        <collection property="files" ofType="com.ly.cloud.user.entity.FileManagement">
+            <result column="FJBH" property="fileId"></result>
+            <result column="FJMC" property="fileName"></result>
+            <result column="FJHZM" property="fileType"></result>
+            <result column="FJCCLJ" property="filePath"></result>
+            <result column="FJDX" property="fileSize"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        PXBH, PXLX, PXLXFL
+    </sql>
+
+    <!-- 培训查询结果列 -->
+    <sql id="Train_Column_List">
+        PXBH, PXLX, PXLXFL, PXDD, PXJJ, PXKSSJ, PXFBSJ, PXFBYH, PXFBTX, PXNR, PXCPJC, FM, PXSP, PXFJ, PXMC, LLL, PXFBYHM, PXZT
+    </sql>
+    
+    <select id="selectPage" resultMap="TrainResultMap">
+        with temp as (
+        SELECT t.PXBH,
+        t.PXLX,
+        t.PXLXFL,
+        t2.PXNRBH,
+        t2.PXDD,
+        t2.PXJJ,
+        t2.PXKSSJ,
+        t2.PXFBSJ,
+        t2.PXFBYH,
+        t2.PXFBTX,
+        t2.PXNR,
+        t2.PXCPJC,
+        t2.FM,
+        t2.PXSP,
+        t2.PXMC,
+        t2.PXFBYHM,
+        t2.LLL,
+        t2.PXZT,
+        t2.PXFJ from LY_LDD_PXLXGLB t left join LY_LDD_PXNRGLB t2 on t.PXBH =t2.PXBH
+        ) SELECT tem.* from temp tem
+        <where>
+            tem.PXZT = '1'
+<!--            <if test="userId != null">-->
+<!--                AND tem.PXFBYH = #{userId}-->
+<!--            </if>-->
+        </where>
+        ORDER BY tem.PXFBSJ DESC
+    </select>
+
+    <select id="selectAllTrain" resultMap="TrainResultMap">
+        SELECT t.PXBH,
+        t.PXLX,
+        t.PXLXFL,
+        t2.PXNRBH,
+        t2.PXDD,
+        t2.PXJJ,
+        t2.PXKSSJ,
+        t2.PXFBSJ,
+        t2.PXFBYH,
+        t2.PXFBTX,
+        t2.PXNR,
+        t2.PXCPJC,
+        t2.FM,
+        t2.PXSP,
+        t2.PXMC,
+        t2.PXFBYHM,
+        t2.PXZT,
+        t2.PXFJ from LY_LDD_PXLXGLB t left join LY_LDD_PXNRGLB t2 on t.PXBH =t2.PXBH
+        where t2.PXZT = '1'
+        ORDER BY t2.PXFBSJ DESC
+    </select>
+
+    <select id="queryDetailById" resultMap="TrainResultMap">
+        with temp as (
+        SELECT t.PXBH, t.PXLX, t.PXLXFL, t2.PXNRBH, t2.PXDD, t2.PXJJ, t2.PXKSSJ, t2.PXFBSJ, t2.PXFBYH, t2.PXFBTX, t2.PXNR, t2.PXCPJC,
+        t2.FM, t2.PXSP, t2.PXMC, t2.PXFBYHM, t2.LLL, t2.PXFJ, t2.PXZT from LY_LDD_PXLXGLB t
+        left join LY_LDD_PXNRGLB t2 on t.PXBH =t2.PXBH
+        WHERE t.PXBH = #{id}
+        ) SELECT tem.*,fjb.*
+        from temp tem
+        LEFT JOIN LY_LDD_FJGLB fjb ON tem.PXBH = fjb.SSBH
+    </select>
+
+
+
+    <select id="queryTopTen" resultMap="TrainResultMap">
+        with temp as (
+        SELECT t.PXBH,
+        t.PXLX,
+        t.PXLXFL,
+        t2.PXNRBH,
+        t2.PXDD,
+        t2.PXJJ,
+        t2.PXKSSJ,
+        t2.PXFBSJ,
+        t2.PXFBYH,
+        t2.PXFBTX,
+        t2.PXNR,
+        t2.PXCPJC,
+        t2.FM,
+        t2.PXSP,
+        t2.PXMC,
+        t2.PXFBYHM,
+        t2.LLL,
+        t2.PXZT,
+        t2.PXFJ from LY_LDD_PXLXGLB t left join LY_LDD_PXNRGLB t2 on t.PXBH =t2.PXBH
+        ) SELECT tem.* from temp tem where rownum &lt;= 8 AND tem.PXLX = '产品培训' AND tem.PXZT = '1' ORDER BY tem.LLL DESC
+    </select>
+
+    <select id="selectByKeywords" resultMap="TrainResultMap">
+        with temp as (
+        SELECT t.PXBH,
+        t.PXLX,
+        t.PXLXFL,
+        t2.PXNRBH,
+        t2.PXDD,
+        t2.PXJJ,
+        t2.PXKSSJ,
+        t2.PXFBSJ,
+        t2.PXFBYH,
+        t2.PXFBTX,
+        t2.PXNR,
+        t2.PXCPJC,
+        t2.FM,
+        t2.PXSP,
+        t2.PXMC,
+        t2.PXFBYHM,
+        t2.LLL,
+        t2.PXZT,
+        t2.PXFJ from LY_LDD_PXLXGLB t left join LY_LDD_PXNRGLB t2 on t.PXBH =t2.PXBH
+        ) SELECT tem.* from temp tem
+        <where>
+            tem.PXZT = '1'
+            <if test="title != null">
+                AND tem.PXMC LIKE CONCAT(concat('%',#{title,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="author != null">
+                AND tem.PXFBYHM LIKE CONCAT(concat('%',#{author,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="type != null">
+                AND tem.PXLX = #{type}
+            </if>
+        </where>
+        ORDER BY tem.PXFBSJ DESC
+    </select>
+
+    <select id="selectAllTrainByUserId" resultMap="TrainResultMap">
+        SELECT t1.*, fjb.* FROM (
+            with temp as (
+            SELECT t.PXBH,
+            t.PXLX,
+            t.PXLXFL,
+            t2.PXNRBH,
+            t2.PXDD,
+            t2.PXJJ,
+            t2.PXKSSJ,
+            t2.PXFBSJ,
+            t2.PXFBYH,
+            t2.PXFBTX,
+            t2.PXNR,
+            t2.PXCPJC,
+            t2.FM,
+            t2.PXSP,
+            t2.PXMC,
+            t2.PXFBYHM,
+            t2.LLL,
+            t2.PXZT
+            from LY_LDD_PXLXGLB t left join LY_LDD_PXNRGLB t2 on t.PXBH =t2.PXBH
+            ) SELECT tem.* from temp tem) t1
+        LEFT JOIN LY_LDD_FJGLB fjb ON t1.PXBH = fjb.SSBH
+        <where>
+            <if test="userId != null">
+               AND t1.PXFBYH = #{userId}
+            </if>
+            <if test="trainStatus != null">
+                AND t1.PXZT = #{trainStatus}
+            </if>
+            <if test="trainStatus == null">
+                AND t1.PXZT = '1'
+            </if>
+        </where>
+        ORDER BY t1.PXFBSJ DESC
+    </select>
+
+</mapper>

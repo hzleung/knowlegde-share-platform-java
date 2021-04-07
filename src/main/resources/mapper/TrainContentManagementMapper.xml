@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.TrainContentManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.TrainContentManagement">
+        <id column="PXNRBH" property="trainContentId" />
+        <result column="PXDD" property="trainPlace" />
+        <result column="PXJJ" property="trainProfile" />
+        <result column="PXKSSJ" property="trainStartTime" />
+        <result column="PXFBSJ" property="trainPublishTime" />
+        <result column="PXFBYH" property="trainPublishUserId" />
+        <result column="PXFBTX" property="trainPublishUserAvatar" />
+        <result column="PXNR" property="trainContent" />
+        <result column="PXCPJC" property="trainProductProfile" />
+        <result column="FM" property="banner" />
+        <result column="PXSP" property="trainVideo" />
+        <result column="PXFJ" property="trainFiles" />
+        <result column="PXBH" property="trainId" />
+        <result column="PXMC" property="trainName" />
+        <result column="PXFBYHM" property="author" />
+        <result column="LLL" property="trainVisit" />
+        <result column="PXZT" property="trainStatus" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        PXNRBH, PXDD, PXJJ, PXKSSJ, PXFBSJ, PXFBYH, PXFBTX, PXNR, PXCPJC, FM, PXSP, PXFJ, PXBH, PXMC, PXFBYHM, LLL, PXZT
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_PXNRGLB
+    </select>
+
+    <select id="queryById" resultMap="BaseResultMap">
+        select
+        *
+        from LY_LDD_PXNRGLB
+        <where>
+            PXBH = #{id}
+        </where>
+    </select>
+
+
+    <update id="updateTrainVisit">
+        update LY_LDD_PXNRGLB
+        set lll = #{lll}
+        <where>
+            PXBH = #{id}
+        </where>
+    </update>
+
+</mapper>

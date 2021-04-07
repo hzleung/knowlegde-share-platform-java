@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.NoticeManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.NoticeManagement">
+        <id column="ID" property="noticeId" />
+        <result column="XXLX" property="noticeType" />
+        <result column="XXZT" property="noticeStatus" />
+        <result column="FBYH" property="userId" />
+        <result column="XXNR" property="noticeContent" />
+        <result column="XXSSWZ" property="articleId" />
+        <result column="XXSSPX" property="trainId" />
+        <result column="XXSSDZ" property="likeId" />
+        <result column="XXSSPL" property="reviewId" />
+        <result column="XXDX" property="targetId" />
+        <result column="XXFBSJ" property="noticePublishTime" />
+    </resultMap>
+
+    <resultMap id="NoticeResultMap" type="com.ly.cloud.user.dto.NoticeDTO">
+        <id column="ID" property="noticeId" />
+        <result column="XXLX" property="noticeType" />
+        <result column="XXZT" property="noticeStatus" />
+        <result column="FBYH" property="userId" />
+        <result column="XXNR" property="noticeContent" />
+        <result column="XXSSWZ" property="articleId" />
+        <result column="XXSSPX" property="trainId" />
+        <result column="XXSSDZ" property="likeId" />
+        <result column="XXSSPL" property="reviewId" />
+        <result column="XXDX" property="targetId" />
+        <result column="XXFBSJ" property="noticePublishTime" />
+        <result column="YHM" property="userName" />
+        <result column="YHTX" property="userAvatar" />
+        <result column="WZBT" property="title" />
+        <result column="PXMC" property="trainName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID, XXLX, XXZT, FBYH, XXNR, XXSSWZ, XXFBSJ, XXSSDZ, XXSSPL, XXDX, XXSSPX
+    </sql>
+    
+    <select id="selectPage" resultMap="BaseResultMap">
+    	select 
+    	<include refid="Base_Column_List"></include>
+    	from LY_LDD_XXGLB
+    </select>
+
+    <delete id="deleteByLikeId">
+        DELETE FROM LY_LDD_XXGLB
+        <where>
+            XXSSDZ = #{likeId}
+        </where>
+    </delete>
+
+    <delete id="deleteByReviewId">
+        DELETE FROM LY_LDD_XXGLB
+        <where>
+            XXSSPL = #{reviewId}
+        </where>
+    </delete>
+
+    <select id="queryAllNotice" resultMap="NoticeResultMap">
+        select xxb.*,yhb.YHM,yhb.YHTX,wzb.WZBT,pxnrb.PXMC
+        from LY_LDD_XXGLB xxb
+        LEFT JOIN LY_LDD_YHB yhb ON xxb.FBYH = yhb.YHID
+        LEFT JOIN LY_LDD_WZGLB wzb ON wzb.ID = xxb.XXSSWZ
+        LEFT JOIN LY_LDD_PXNRGLB pxnrb ON xxb.XXSSPX = pxnrb.PXBH
+        <where>
+            xxb.XXDX = #{userId}
+        </where>
+        ORDER BY xxb.XXFBSJ DESC
+    </select>
+
+    <select id="queryNoticesNum" resultType="Integer">
+        select COUNT(*) num
+        from LY_LDD_XXGLB
+        <where>
+            XXDX = #{userId}
+            AND XXZT = '0'
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        UPDATE LY_LDD_XXGLB
+        set
+        XXZT = '1'
+        <where>
+            XXZT = '0'
+        </where>
+    </update>
+
+</mapper>

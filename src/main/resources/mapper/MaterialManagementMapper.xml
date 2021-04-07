@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.cloud.user.mapper.MaterialManagementMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ly.cloud.user.entity.MaterialManagement">
+        <id column="SCID" property="materialId" />
+        <result column="SCLX" property="materiaType" />
+        <result column="LOGOLX" property="logoType" />
+        <result column="SCBT" property="materialTitle" />
+        <result column="SCSM" property="materialDescribe" />
+        <result column="SCFJ" property="materialFile" />
+        <result column="SCFM" property="materialBanner" />
+        <result column="FBYH" property="materialPublishUerId" />
+        <result column="FBSJ" property="materialPublishTime" />
+        <result column="SCZT" property="materialStatus" />
+    </resultMap>
+
+    <resultMap id="MaterialResultMap" type="com.ly.cloud.user.dto.MaterialDTO">
+        <id column="SCID" property="materialId" />
+        <result column="SCLX" property="materiaType" />
+        <result column="LOGOLX" property="logoType" />
+        <result column="SCBT" property="materialTitle" />
+        <result column="SCSM" property="materialDescribe" />
+        <result column="SCFM" property="materialBanner" />
+        <result column="SCFJ" property="materialFile" />
+        <result column="FBYH" property="materialPublishUerId" />
+        <result column="FBSJ" property="materialPublishTime" />
+        <result column="SCZT" property="materialStatus" />
+        <result column="YHM" property="author" />
+        <result column="YHTX" property="authorAvatar" />
+        <collection property="files" ofType="com.ly.cloud.user.entity.FileManagement">
+            <result column="FJBH" property="fileId"></result>
+            <result column="FJMC" property="fileName"></result>
+            <result column="FJHZM" property="fileType"></result>
+            <result column="FJCCLJ" property="filePath"></result>
+            <result column="FJDX" property="fileSize"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        SCID, SCLX, LOGOLX, SCBT, SCSM, SCFJ, SCFM, FBYH, FBSJ, SCZT
+    </sql>
+    
+    <select id="selectPage" resultMap="MaterialResultMap">
+        SELECT
+        scb.*, fjb.*, yhb.YHM, yhb.YHTX
+        FROM LY_LDD_SCB scb
+        LEFT JOIN LY_LDD_FJGLB fjb ON scb.SCID = fjb.SSBH
+        LEFT JOIN LY_LDD_YHB yhb ON scb.FBYH = yhb.YHID
+    	<where>
+            <if test="type != null">
+                AND scb.SCLX = #{type}
+            </if>
+            <if test="materialStatus != null">
+                AND scb.SCZT = #{materialStatus}
+            </if>
+            <if test="materialStatus == null">
+                AND scb.SCZT = '1'
+            </if>
+        </where>
+    	ORDER BY scb.FBSJ DESC
+    </select>
+
+<!--    获取对应logo类型分页数据-->
+    <select id="selectLogoPage" resultMap="MaterialResultMap">
+    	select
+    	scb.*, fjb.*, yhb.YHM, yhb.YHTX
+    	from LY_LDD_SCB scb
+    	LEFT JOIN LY_LDD_FJGLB fjb ON scb.SCID = fjb.SSBH
+    	LEFT JOIN LY_LDD_YHB yhb ON scb.FBYH = yhb.YHID
+    	WHERE scb.LOGOLX = #{logoType} AND scb.SCZT = '1'
+    	ORDER BY scb.FBSJ DESC
+    </select>
+
+<!--    素材详情-->
+    <select id="selectDetailById" resultMap="MaterialResultMap">
+        SELECT
+        scb.*, fjb.*, yhb.YHM, yhb.YHTX
+        FROM LY_LDD_SCB scb
+        LEFT JOIN LY_LDD_FJGLB fjb ON scb.SCID = fjb.SSBH
+        LEFT JOIN LY_LDD_YHB yhb ON scb.FBYH = yhb.YHID
+        WHERE scb.SCID = #{id}
+    </select>
+
+<!--    根据type，查找对应的素材-->
+    <select id="selectMaterialByType" resultMap="BaseResultMap">
+        select
+        *
+        from LY_LDD_SCB
+        where SCLX = #{type} AND SCZT = '1'
+        ORDER BY FBSJ DESC
+    </select>
+
+<!--    搜索-->
+    <select id="queryPageBykeywords" resultMap="MaterialResultMap">
+        SELECT
+        scb.*, yhb.YHM, yhb.YHTX
+        FROM LY_LDD_SCB scb
+        LEFT JOIN LY_LDD_YHB yhb ON scb.FBYH = yhb.YHID
+        <where>
+            AND scb.SCZT = '1'
+            <if test="keywords != null">
+                AND scb.SCBT LIKE CONCAT(concat('%',#{keywords,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="materialType != null">
+                AND scb.SCLX = #{materialType}
+            </if>
+            <if test="logoType != null">
+                AND scb.LOGOLX = #{logoType}
+            </if>
+        </where>
+        ORDER BY FBSJ DESC
+    </select>
+
+<!--    个人中心的素材-->
+    <select id="selectPageByUserId" resultMap="MaterialResultMap">
+        SELECT
+        scb.*, yhb.YHM, yhb.YHTX
+        FROM LY_LDD_SCB scb
+        LEFT JOIN LY_LDD_YHB yhb ON scb.FBYH = yhb.YHID
+        <where>
+            AND scb.SCZT = '1'
+            AND scb.FBYH = #{userId}
+        </where>
+        ORDER BY FBSJ DESC
+    </select>
+
+</mapper>
